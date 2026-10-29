@@ -56,7 +56,10 @@ stopped reporting them.
 
 ## Counting
 
-Reports come from `reports-4471.json`, one per id: the export repeats some rows across pages. The
-table is built from that file at render time, so it moves when the desk merges more reports.
+Reports come from `reports-4471.json`, one per id: the export repeats some rows across pages. Each
+report counts under the cause its tenant and form point to, the way the desk's cause table files it,
+so the one-day reports also count under `parser`; the rows add up to more than the total for that
+reason. The table is built from that file at render time, so it moves when the desk merges more
+reports.
 
 <RenderStamp {signature} />
