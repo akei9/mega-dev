@@ -1,0 +1,62 @@
+---
+layout: runbook
+title: '#4471 · three problems, not one'
+owner: akei9
+status: open
+reviewed: 2026-10-29
+signature: v1.eyJzdWIiOiIxMDUxIiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYXQiOjE3OTMyMzYxMDAsImV4cCI6MTc5MzMyMjUwMH0.32QMIhauBYZtFXIuqAozmKy5GXE25UvGVQ1LhZ9hlCM
+---
+
+<script>
+  import ProblemTable from '#lib/kb/ProblemTable.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+
+  const issues = {
+    parser: 'https://github.com/akei9/mega-dev/issues/1',
+    hint: 'https://github.com/akei9/mega-dev/issues/2',
+    'one-day': 'https://github.com/akei9/mega-dev/issues/3',
+  };
+</script>
+
+[#4471](/kb/incidents/4471) was merged as one issue and marked known. Read report by report, it
+holds three problems, and only one of them has a fix queued. Each now has its own ticket.
+
+<ProblemTable ticket={4471} {issues} />
+
+<Callout kind="warn">
+Fixing the parser does not close #4471. The form hint and the one-day move stay broken after it ships.
+</Callout>
+
+## The three problems
+
+**`parser`: the shared parser reads dates month first.** Every tenant in #4471 writes the day
+first, so any date with a day of 12 or less comes out swapped: 7 April becomes 4 July. This is the
+bug the #4471 page describes, and most of its reports.
+
+**`hint`: the booking-v3 form tells people to type the month first.** It prints `MM/DD/YYYY`
+under the date field for every tenant. People follow the hint, and the form reads what they typed
+the tenant's way, day first. The symptom is the same swap, but the fix is in the form, and fixing
+the parser alone does not touch it. Only form reports from booking-v3 tenants land here.
+
+**`one-day`: the date moves by one day.** Tuesday 12 May shows as Monday 11 May; a client in
+Lisbon gets Tuesday and one in Toronto gets Monday for the same meeting. No day/month order
+explains that. The desk already noted these reports (`desk-notes.json`) but the cause table filed
+them under `parser` by tenant. They are few, and likely under-reported: one reporter says they
+stopped reporting them.
+
+## How to tell them apart
+
+- Go by the tenant, its booking form and the channel (`causes.ts`), then by what the body shows. A
+  swap names two dates with day and month exchanged; a one-day move does not.
+- Not by `intakeTag`: intake guesses from the reporter's browser, and the table above counts how
+  often that guess points somewhere else.
+- Not by subject line. [Decision 0001](/kb/decisions/0001-dedupe-by-subject) merges on subject,
+  and all three problems arrive under the same subjects ("Wrong day on the invite").
+
+## Counting
+
+Reports come from `reports-4471.json`, one per id: the export repeats some rows across pages. The
+table is built from that file at render time, so it moves when the desk merges more reports.
+
+<RenderStamp {signature} />
